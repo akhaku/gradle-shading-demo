@@ -1,0 +1,3 @@
+rootProject.name = 'gradle-shading-demo'
+include 'curator2-recipes-shaded'
+include 'my-library'

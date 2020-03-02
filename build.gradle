@@ -1,27 +1,8 @@
-group = 'com.akhaku'
-version = '0.1.0'
+allprojects {
+  group = 'com.akhaku'
+  version = '0.1.0'
 
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'ivy-publish'
-
-publishing {
-  // Set up both maven and ivy publish - your project should already have this
-  publications {
-    mavenPublish(MavenPublication) {
-      from components.java
-    }
-    ivyPublish(IvyPublication) {
-      from components.java
-    }
-  }
-  // set up local repos for publishing just so we can debug - you normally don't need this
   repositories {
-    maven {
-      url = "file://${buildDir}/repo/maven"
-    }
-    ivy {
-      url = "file://${buildDir}/repo/ivy"
-    }
+    jcenter()
   }
 }

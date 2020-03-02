@@ -1,0 +1,12 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+}
+
+apply plugin: 'java-library'
+
+dependencies {
+  // don't expose shaded classes on compile scope
+  implementation project(path: ':curator2-recipes-shaded', configuration: 'shadow')
+}

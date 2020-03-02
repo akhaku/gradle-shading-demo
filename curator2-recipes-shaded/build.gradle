@@ -1,0 +1,60 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+  }
+}
+
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+  // we're going to be shading this guy
+  implementation 'org.apache.curator:curator-recipes:2.12.0'
+
+  // we will be excluding these from shading so add them as explicit dependencies
+  shadow 'io.netty:netty:3.7.0.Final' // as requested by zookeeper
+  shadow 'org.slf4j:slf4j-api:1.7.6' // as requested by curator-client
+}
+
+shadowJar {
+  dependencies {
+    // these are stable, so don't shade them
+    exclude(dependency('org.slf4j:slf4j-api'))
+    exclude(dependency('io.netty:netty'))
+
+    // we don't actually need log4j so exclude it
+    exclude(dependency('log4j:log4j'))
+  }
+
+  // not actually needed in our case, but you often need this
+  mergeServiceFiles()
+}
+
+// configure relocation for all classes we shade
+task relocateShadowJar(type: ConfigureShadowRelocation) {
+  target = tasks.shadowJar
+  // use 'curator2' in our prefix in case we want to include curator4 as well
+  prefix = 'mylibrary.shading.curator2'
+}
+tasks.shadowJar.dependsOn tasks.relocateShadowJar
+
+publishing {
+  publications {
+    // this tells maven-publish to publish our shadow jar
+    mavenPublish(MavenPublication) { publication ->
+      project.shadow.component(publication)
+    }
+  }
+  // set up local repo for publishing just so we can verify and debug - you normally don't need this
+  repositories {
+    maven {
+      url = "file://${buildDir}/repo/maven"
+    }
+  }
+}
